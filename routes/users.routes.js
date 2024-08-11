@@ -1,6 +1,7 @@
 import { Router } from "express";
 import checkIdNumber from "../middlewares/checkIdNumber.middleware";
 import userExists from "../middlewares/userExists.middleware";
+import User from "../models/user";
 
 export let users = [
     { id: 0, name: "Brandon" },
@@ -13,8 +14,10 @@ const usersRouter = Router();
 
 // app.com/users/Daniela
 
-usersRouter.get("/", (req, res) => {
-    res.json(users);
+usersRouter.get("/", async (req, res) => {
+    const dbUsers = await User.findAll();
+
+    res.json(dbUsers);
 });
 
 usersRouter.get("/:id", [checkIdNumber, userExists], (req, res) => {
@@ -26,12 +29,12 @@ usersRouter.get("/:id", [checkIdNumber, userExists], (req, res) => {
 // GET => app.com/users
 // POST [{name:"Luis"}] => app.com/users
 
-usersRouter.post("/", (req, res) => {
-    const { usersToCreate } = req.body;
+usersRouter.post("/", async (req, res) => {
+    const { userToCreate } = req.body;
 
-    usersToCreate.forEach((utc) => users.push(utc));
+    await User.create(userToCreate);
 
-    res.status(201).json(usersToCreate);
+    res.status(201).json(userToCreate);
 });
 
 // PATCH { name: "Juan" } => app.com/user/3
