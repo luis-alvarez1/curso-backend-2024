@@ -1,7 +1,11 @@
-import { users } from "../routes/users.routes";
+import User from "../models/user";
 
-const userExists = (req, res, next) => {
-    const user = users.find((u) => u.id === +req.params.id);
+const userExists = async (req, res, next) => {
+    const user = await User.findOne({
+        where: {
+            id: +req.params.id,
+        },
+    });
 
     if (!user) {
         res.status(404).json({ message: "User not found" });

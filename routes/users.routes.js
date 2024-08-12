@@ -3,16 +3,7 @@ import checkIdNumber from "../middlewares/checkIdNumber.middleware";
 import userExists from "../middlewares/userExists.middleware";
 import User from "../models/user";
 
-export let users = [
-    { id: 0, name: "Brandon" },
-    { id: 1, name: "Karen" },
-    { id: 2, name: "Daniela" },
-    { id: 3, name: "Jason" },
-];
-
 const usersRouter = Router();
-
-// app.com/users/Daniela
 
 usersRouter.get("/", async (req, res) => {
     const dbUsers = await User.findAll();
@@ -21,16 +12,18 @@ usersRouter.get("/", async (req, res) => {
 });
 
 usersRouter.get("/:id", [checkIdNumber, userExists], (req, res) => {
-    const user = users.find((u) => u.id === +req.params.id);
+    const user = User.findOne({
+        id: +req.params.id,
+    });
 
     res.json(user);
 });
 
 // GET => app.com/users
-// POST [{name:"Luis"}] => app.com/users
+// POST {name:"Luis"} => app.com/users
 
 usersRouter.post("/", async (req, res) => {
-    const { userToCreate } = req.body;
+    const userToCreate = req.body;
 
     await User.create(userToCreate);
 
@@ -38,27 +31,38 @@ usersRouter.post("/", async (req, res) => {
 });
 
 // PATCH { name: "Juan" } => app.com/user/3
-usersRouter.patch("/:id", [checkIdNumber, userExists], (req, res) => {
-    const user = users.find((u) => u.id === +req.params.id);
+usersRouter.patch("/:id", [checkIdNumber, userExists], async (req, res) => {
+    await User.update(req.body, {
+        where: {
+            id: req.params.id,
+        },
+    });
 
-    users = users.filter((u) => u.id !== +req.params.id);
+    const userUpdated = await User.findOne({
+        where: {
+            id: +req.params.id,
+        },
+    });
 
-    const userUpdated = {
-        id: user.id,
-        name: req.body.name,
-    };
-
-    users.push(userUpdated);
+    console.log(userUpdated);
 
     res.json(userUpdated);
 });
 
-usersRouter.delete("/:id", [checkIdNumber, userExists], (req, res) => {
-    const user = users.find((u) => u.id === +req.params.id);
+usersRouter.delete("/:id", [checkIdNumber, userExists], async (req, res) => {
+    const userToDelete = await User.findOne({
+        where: {
+            id: +req.params.id,
+        },
+    });
 
-    users = users.filter((u) => u.id !== +req.params.id);
+    await User.destroy({
+        where: {
+            id: +req.params.id,
+        },
+    });
 
-    res.json(user);
+    res.json(userToDelete);
 });
 
 export default usersRouter;

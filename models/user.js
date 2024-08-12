@@ -8,5 +8,5 @@ const User = dbConnection.define("User", {
     },
 });
 
-User.sync();
+await User.sync();
 export default User;
