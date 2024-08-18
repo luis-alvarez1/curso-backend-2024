@@ -8,7 +8,6 @@ import { dbConnection } from "./config/db";
 const app = express();
 
 app.use(cors());
-
 app.use(bodyParser());
 
 app.use("/users", usersRouter);
