@@ -1,8 +1,20 @@
+import redis from "../config/redis";
 import User from "../models/user";
 import jwt from "jsonwebtoken";
 
 export const GetAllUsers = async (req, res) => {
+    const usersKey = "users";
+
+    let cachedResponse = await redis.get(usersKey);
+    if (cachedResponse) {
+        cachedResponse = JSON.parse(cachedResponse);
+
+        return res.status(200).json(cachedResponse);
+    }
+
     const users = await User.findAll();
+
+    await redis.set(usersKey, JSON.stringify(users));
 
     res.json(users);
 };
