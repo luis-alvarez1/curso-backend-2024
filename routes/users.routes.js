@@ -11,6 +11,8 @@ import {
     UpdateUserById,
 } from "../controllers/users.controller";
 import authorizateUser from "../middlewares/users/authorizateUser.middleware";
+import { body, param } from "express-validator";
+import validateDataMiddleware from "../middlewares/validation/validateData.middleware";
 
 const usersRouter = Router();
 
@@ -25,7 +27,18 @@ usersRouter.post("/login", Login);
 // GET => app.com/users
 // POST {name:"Luis"} => app.com/users
 
-usersRouter.post("/", CreateUser);
+usersRouter.post(
+    "/",
+    [
+        body("username", "Username not valid").exists().isString(),
+        body("password", "Password invalid").exists().isString().isLength({
+            min: 1,
+            max: 10,
+        }),
+        validateDataMiddleware,
+    ],
+    CreateUser
+);
 
 // PATCH { name: "Juan" } => app.com/user/3
 usersRouter.patch("/:id", [checkIdNumber, userExists], UpdateUserById);
