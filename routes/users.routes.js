@@ -1,68 +1,29 @@
 import { Router } from "express";
-import checkIdNumber from "../middlewares/checkIdNumber.middleware";
-import userExists from "../middlewares/userExists.middleware";
-import User from "../models/user";
+import checkIdNumber from "../middlewares/users/checkIdNumber.middleware";
+import userExists from "../middlewares/users/userExists.middleware";
+
+import {
+    CreateUser,
+    DeleteUserById,
+    GetAllUsers,
+    GetOneUserById,
+    UpdateUserById,
+} from "../controllers/users.controller";
 
 const usersRouter = Router();
 
-usersRouter.get("/", async (req, res) => {
-    const dbUsers = await User.findAll();
+usersRouter.get("/", GetAllUsers);
 
-    res.json(dbUsers);
-});
-
-usersRouter.get("/:id", [checkIdNumber, userExists], (req, res) => {
-    const user = User.findOne({
-        id: +req.params.id,
-    });
-
-    res.json(user);
-});
+usersRouter.get("/:id", [checkIdNumber, userExists], GetOneUserById);
 
 // GET => app.com/users
 // POST {name:"Luis"} => app.com/users
 
-usersRouter.post("/", async (req, res) => {
-    const userToCreate = req.body;
-
-    await User.create(userToCreate);
-
-    res.status(201).json(userToCreate);
-});
+usersRouter.post("/", CreateUser);
 
 // PATCH { name: "Juan" } => app.com/user/3
-usersRouter.patch("/:id", [checkIdNumber, userExists], async (req, res) => {
-    await User.update(req.body, {
-        where: {
-            id: req.params.id,
-        },
-    });
+usersRouter.patch("/:id", [checkIdNumber, userExists], UpdateUserById);
 
-    const userUpdated = await User.findOne({
-        where: {
-            id: +req.params.id,
-        },
-    });
-
-    console.log(userUpdated);
-
-    res.json(userUpdated);
-});
-
-usersRouter.delete("/:id", [checkIdNumber, userExists], async (req, res) => {
-    const userToDelete = await User.findOne({
-        where: {
-            id: +req.params.id,
-        },
-    });
-
-    await User.destroy({
-        where: {
-            id: +req.params.id,
-        },
-    });
-
-    res.json(userToDelete);
-});
+usersRouter.delete("/:id", [checkIdNumber, userExists], DeleteUserById);
 
 export default usersRouter;
