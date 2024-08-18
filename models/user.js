@@ -2,9 +2,13 @@ import { DataTypes } from "sequelize";
 import { dbConnection } from "../config/db";
 
 const User = dbConnection.define("User", {
-    name: {
+    username: {
         type: DataTypes.STRING,
         allowNull: false,
+    },
+    password: {
+        type: DataTypes.STRING,
+        allowNull: true,
     },
 });
 

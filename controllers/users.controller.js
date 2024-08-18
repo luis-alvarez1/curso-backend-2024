@@ -1,4 +1,5 @@
 import User from "../models/user";
+import jwt from "jsonwebtoken";
 
 export const GetAllUsers = async (req, res) => {
     const users = await User.findAll();
@@ -52,4 +53,25 @@ export const DeleteUserById = async (req, res) => {
     });
 
     res.json(userToDelete);
+};
+
+export const Login = async (req, res) => {
+    const { username, password } = req.body;
+
+    const user = await User.findOne({
+        where: {
+            username: username,
+            password: password,
+        },
+    });
+
+    if (!user) {
+        return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const token = jwt.sign({ userId: user.id }, "backend-2024", {
+        expiresIn: 60 * 60,
+    });
+
+    res.json({ token: token });
 };
